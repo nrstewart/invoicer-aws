@@ -2,8 +2,10 @@ resource "aws_vpc" "main" {
     cidr_block              = "172.32.0.0/16"
     enable_dns_hostnames    = true
     instance_tenancy        = "default"
+
     tags                    = {
         Name                = "${var.environment}"
+        service             = "${var.identifier}"
     }
 }
 
@@ -16,7 +18,8 @@ resource "aws_subnet" "main" {
     availability_zone       = "${lookup(var.az-subnet-mapping[count.index], "az")}"
 
     tags                    = {
-        Name                = "${var.environment}-${lookup(var.az-subnet-mapping[count.index], "name")}"
+        Name                = "${var.environment}"
+        service             = "${var.identifier}"
     }
 }
 
@@ -32,6 +35,6 @@ resource "aws_route" "main" {
 
 resource "aws_route_table_association" "main" {
     count                   = "${length(var.az-subnet-mapping)}"
-    subnet_id               = "${element(aws_subnet.main.*.id, count.index)}"
     route_table_id          = "${aws_vpc.main.main_route_table_id}"
+    subnet_id               = "${element(aws_subnet.main.*.id, count.index)}"
 }
